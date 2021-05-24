@@ -1,6 +1,11 @@
-#### 안녕하십니까.
+# 안녕하세요 !
 
 ### 최진식 프로젝트 입니다.
+
+* 깃 튜토리얼
+  * 깃 1
+  * 깃 2
+  * 깃 3
 
 <!--
 **ChoiJInsik/ChoiJInsik** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
