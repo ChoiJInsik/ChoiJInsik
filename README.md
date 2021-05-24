@@ -1,6 +1,6 @@
 # 안녕하세요 !
 
-## 최진식 프로젝트 '식육증가' 입니다.
+## <img width="432" alt="yooksik" src="https://user-images.githubusercontent.com/81514977/119380279-7a52ec00-bcfb-11eb-86da-519e2656c0b4.png"> 최진식 프로젝트 '식육증가' 입니다.
 
 * **식육증가** 란?
   * 집 식탁에서 다양한 고기를 맛볼 수 있도록 기획한 '고기전문 쇼핑몰'
