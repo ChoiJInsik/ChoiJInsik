@@ -1,4 +1,6 @@
-### Hi there 👋
+#### 안녕하십니까.
+
+### 최진식 프로젝트 입니다.
 
 <!--
 **ChoiJInsik/ChoiJInsik** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
