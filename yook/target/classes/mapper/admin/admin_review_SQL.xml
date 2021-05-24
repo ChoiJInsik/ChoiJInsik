@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="review">
+
+	<select id="adminReviewList" parameterType="hashmap" resultType="hashmap">
+	<!-- <include refid="common.pagingPre"/> -->
+	<![CDATA[
+		SELECT DISTINCT
+			R.RE_NUM, 
+            R.GOODS_NUM,
+            R.MEM_NUM,
+            R.RE_TITLE,
+            R.RE_CONTENT,
+			R.RE_DATE, 
+            G.GOODS_CATE,
+            M.MEM_NAME
+
+    	FROM REVIEW R, GOODS G, MEMBER M
+        WHERE
+            R.MEM_NUM = M.MEM_NUM
+        AND
+            R.GOODS_NUM = #{IDX}
+        AND 
+            G.GOODS_NUM = R.GOODS_NUM
+        
+    	ORDER BY RE_NUM DESC
+	]]>
+	 <!-- <include refid="common.pagingPost"/> -->
+	</select>
+	
+	<select id="adminReviewList2" parameterType="hashmap" resultType="hashmap">
+	<!-- <include refid="common.pagingPre"/> -->
+	<![CDATA[
+		SELECT DISTINCT
+			R.RE_NUM, 
+            R.GOODS_NUM,
+            R.MEM_NUM,
+            R.RE_TITLE,
+            R.RE_CONTENT,
+			R.RE_DATE, 
+            G.GOODS_CATE,
+            M.MEM_NAME
+
+    	FROM REVIEW R, GOODS G, MEMBER M
+        WHERE
+            R.MEM_NUM = M.MEM_NUM
+       
+        AND 
+            G.GOODS_NUM = R.GOODS_NUM
+        
+    	ORDER BY RE_NUM DESC
+	]]>
+	 <!-- <include refid="common.pagingPost"/> -->
+	</select>
+	
+<!-- 	 상품 리뷰 
+	<select id="reviewList" parameterType="hashmap">
+	<![CDATA[
+		SELECT DISTINCT
+			RE_NUM, GOODS_NUM, RE_TITLE,RE_CONTENT,
+			RE_DATE, RE_IMAGE, GOODS_CATE, MEM_NAME
+    	FROM REVIEW 
+    	ORDER BY RE_NUM DESC
+	]]>
+	</select> -->
+	
+	<!-- <select id="reviewDetail" parameterType="hashmap" resultType="hashmap">
+         <![CDATA[
+         SELECT 
+            RE_NUM,
+            GOODS_NUM,
+            RE_TITLE,
+            RE_DATE,
+            RE_CONTENT,
+            RE_DETAIL,
+            GOODS_CATE,
+            MEM_NAME
+           
+         FROM
+            REVIEW
+         WHERE
+            RE_NUM = #{RE_NUM}
+             ]]>
+   </select>  -->
+
+	<!-- 리뷰등록(손님) -->
+	<insert id="insertReview" parameterType="hashmap">
+		   <![CDATA[
+				INSERT INTO REVIEW (
+                    RE_NUM,
+                    MEM_NUM,
+                    GOODS_NUM,
+					RE_TITLE, 
+					RE_CONTENT
+				) VALUES (
+					RE_NUM_SEQ.NEXTVAL,
+					#{MEM_NUM},
+					#{GOODS_NUM},
+					#{RE_TITLE},
+                    #{RE_CONTENT}
+                    )
+				]]>
+	</insert>	
+	
+	<select id="updateForm" parameterType="hashmap" resultType="hashmap">
+   		<![CDATA[
+   			SELECT 
+   				RE_TITLE,
+   				RE_CONTENT,
+   				RE_DATE
+   			FROM
+   				REVIEW
+   			WHERE
+   				RE_NUM = #{RE_NUM}
+   		]]>
+   </select>
+   
+	<!-- 리뷰 수정(손님) -->
+	<select id="updateReview" parameterType="hashmap">
+      <![CDATA[
+         UPDATE REVIEW
+         SET
+            RE_TITLE = #{RE_TITLE},
+            RE_CONTENT = #{RE_CONTENT}
+         WHERE
+            MEM_NUM = #{MEM_NUM}
+      ]]>
+	</select>
+
+	
+
+	<!-- 리뷰 삭제 -->
+	<delete id="deleteReview" parameterType="hashmap">
+<![CDATA[
+   DELETE  REVIEW
+   WHERE   MEM_NUM = #{MEM_NUM}
+]]>
+	</delete>
+
+</mapper>

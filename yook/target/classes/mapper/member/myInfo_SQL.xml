@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="myInfo">
+	<select id="selectMyInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			MEM_ID,
+			MEM_GRADE,
+			MEM_NUM,
+			MEM_EMAIL,
+			MEM_NAME,
+			MEM_JOINDATE,
+			MEM_PHONE,
+			MEM_ZIPCODE,
+			MEM_ADDRESS1,
+			MEM_ADDRESS2
+			
+		FROM
+			MEMBER
+		WHERE
+			MEM_NUM=#{MEM_NUM}
+	</select>
+
+	<!-- <select id="orderStatus" parameterType="hashmap" resultType="hashmap">
+		SELECT
+	
+	</select> -->
+	
+	
+	
+		<select id="selectMyOrderInfo" parameterType="hashmap" resultType="hashmap">
+		
+		
+<!-- 		SELECT  -->
+<!-- 			G.GOODS_NAME, -->
+<!-- 	    	OD.ORDER_DETAIL_DATE, -->
+<!-- 	   		 OD.ORDER_NUM, -->
+<!-- 	   		 O.ORDER_PRICE, -->
+<!-- 	   		 O.ORDER_DETAIL_AMOUNT -->
+		
+<!-- 		FROM -->
+<!-- 			ORDERS_DETAIL OD, -->
+<!-- 			GOODS_ATTRIBUTE GA, -->
+<!-- 			MEMBER M, -->
+<!-- 			GOODS G, -->
+<!-- 			ORDERS O -->
+<!-- 		WHERE  -->
+<!-- 			MEM_NUM = #{MEM_NUM} AND OD.ORDER_NUM = O.ORDER_NUM AND OD.GOODS_NUM = G.GOODS_NUM; -->
+
+SELECT 
+			MEM_GRADE,
+			MEM_NUM
+			
+		FROM
+			MEMBER
+		WHERE
+			MEM_NUM=#{MEM_NUM}
+
+	</select>
+	
+	
+	
+			<select id="selectMyPointInfo" parameterType="hashmap" resultType="hashmap">
+
+SELECT  
+			POINT_P,
+ 			POINT_DATE,
+			POINT_STATUS, 
+			POINT_CONTENT 
+			
+ 		FROM 
+			POINT 
+ 		WHERE 
+ 			MEM_NUM = #{MEM_NUM} 
+
+
+	</select>
+	
+	
+	
+	
+	<select id="selectMyInfoModifyForm" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT
+				MEM_ID,
+				MEM_PW,
+				MEM_NAME,
+				MEM_NICK,
+				MEM_EMAIL,
+				MEM_PHONE,
+				MEM_ZIPCODE,
+				MEM_ADDRESS1,
+				MEM_ADDRESS2
+			FROM
+				MEMBER
+			WHERE
+				MEM_ID = #{MEM_ID}		
+		]]>
+	</select>
+<!-- 	요거를 건들면 되겟다!!!!!!! -->
+	<update id="updateMyInfo" parameterType="hashmap">
+		<![CDATA[
+			UPDATE
+				MEMBER
+			SET
+				MEM_PW = #{MEM_PW},
+				
+				
+				
+				
+				MEM_ZIPCODE = #{MEM_ZIPCODE},
+				MEM_ADDRESS1 = #{MEM_ADDRESS1},
+				MEM_ADDRESS2 = #{MEM_ADDRESS2}
+			WHERE
+				MEM_ID = #{MEM_ID}
+		 ]]>
+	</update>
+	
+	   <update id="deleteMyInfo" parameterType="hashmap">
+      <![CDATA[
+         UPDATE
+            MEMBER
+         SET
+            MEM_DEL_GB = 'Y'
+         WHERE
+            MEM_ID = #{MEM_ID}
+       ]]>
+   </update>
+   
+   <select id="selectMyBoardList" parameterType="hashmap" resultType="hashmap">
+      <![CDATA[
+      select aaa.*
+    , (select count(*) as total_count 
+       FROM COMMENTS C 
+       where c.COMMENTS_PARENT = aaa.BOARD_NUM AND COMMENTS_DEL_GB = 'N'
+       ) AS TOTAL_COMMENTS
+from (
+	SELECT
+        row_number() over (order by board_date desc) rnum,
+        B.BOARD_NUM,
+        B.BOARD_CAT,
+        B.BOARD_TITLE,
+        M.MEM_NICK,
+        B.BOARD_DATE,
+        B.BOARD_COUNT,
+        B.BOARD_WRITER
+	FROM MEMBER M, BOARD B
+	WHERE M.MEM_NUM = B.BOARD_WRITER 
+	AND B.BOARD_DEL_GB='N'
+	AND MEM_ID = #{MEM_ID}
+     )aaa
+where aaa.rnum between 0 and 10
+ORDER BY BOARD_NUM DESC
+      ]]>
+   </select>
+</mapper>
+

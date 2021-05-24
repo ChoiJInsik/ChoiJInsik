@@ -1,0 +1,359 @@
+1.프로젝트 생성(spring4-chap02)
+2.pom.xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.madvirus.spring4</groupId>
+	<artifactId>spring4-chap02</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>4.0.4.RELEASE</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>utf-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+3. User
+package net.madvirus.spring4.chap02;
+
+public class User { //자바빈 생성
+
+	private String id;
+	private String password;
+
+	public User(String id, String password) {
+		this.id = id;
+		this.password = password;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public boolean matchPassword(String inputPasswd) {	//인풋패스워드를 받아서 패스워드랑 같은지 true/false로 반환
+		return password.equals(inputPasswd);
+	}
+
+	public void changePassword(String oldPassword, String newPassword) {
+		if (!matchPassword(oldPassword))		//여기가 false면은 
+			throw new IllegalArgumentException("illegal password");	//예외발생하고
+		password = newPassword;	//true면 새로운 패스워드 
+	}
+
+}
+
+4.UserRepository 
+package net.madvirus.spring4.chap02;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class UserRepository {
+
+	private Map<String, User> userMap = new HashMap<String, User>(); //map은 인터페이스, 인터페이스로 객체를 생성하는데 클래스 객체로 생성 (다형성 개념)
+		jdk 1.7일때는 안넣어도 되는데, 1.8일때 Map 은 앞뒤로 넣어줘야함
+		저장하는 객체는 앞에서 만든 user라는 객체
+
+	public User findUserById(String id) {	//id받아서 맵의 String 에다가 넣어 User로 반환
+		return userMap.get(id);
+	}
+
+	public void setUsers(List<User> users) {  
+		for (User u : users)		//List에서 하나씩 꺼내다가
+			userMap.put(u.getId(), u); //Map에다 넣어줌
+	}
+}
+
+[AuthInfo]
+package net.madvirus.spring4.chap02;
+
+public class AuthInfo {	//자바빈
+	private String id;	//아이디, 생성자, get
+
+	public AuthInfo(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+}
+
+
+5.AuthFailLogger 
+package net.madvirus.spring4.chap02;
+
+public class AuthFailLogger {
+
+	private int threshold;		//변수 두개
+	private int failCounts;
+	
+	public void insertBadPw(String userId, String inputPw) {	//아이디와 비밀번호 받아서 
+		System.out.printf("AuthFail [type=badpw, userid=%s, pw=%s]\n", userId, inputPw); //화면에 출력
+		failCounts++;
+		if (threshold > 0 && failCounts > threshold) {
+			notifyTooManyFail();	//아래 메소드 호출하라는 말
+			failCounts = 0;
+		}
+	}
+
+	private void notifyTooManyFail() {
+		System.out.println("너무 많은 로그인 시도 실패");
+	}
+
+	public void setThreshold(int thresold) {	//thresold는 셋으로 값을 넣어서 작업한다.
+		this.threshold = thresold;
+	}
+
+}
+
+6.AuthException 
+package net.madvirus.spring4.chap02;
+
+@SuppressWarnings("serial")
+public class AuthException extends RuntimeException {
+
+}
+
+7.UserNotFoundException 
+package net.madvirus.spring4.chap02;
+
+@SuppressWarnings("serial")
+public class UserNotFoundException extends RuntimeException {
+
+}
+
+8.AuthenticationService 
+package net.madvirus.spring4.chap02;
+
+public class AuthenticationService {
+
+	private UserRepository userRepository;
+	private AuthFailLogger failLogger;	//이 서비스가 돌아가려면 두개의 변수에 의존해야함
+
+	public AuthInfo authenticate(String id, String password) {
+		User user = userRepository.findUserById(id);	//자바빈을 사용
+		if (user == null)
+			throw new UserNotFoundException();
+
+		if (!user.matchPassword(password)) {
+			failLogger.insertBadPw(id, password); //failLogger에 insertBadPw발생해서
+			throw new AuthException();	//예외 발생시켜!
+		}
+
+		return new AuthInfo(user.getId());	//로그인에 성공하면 authinfo객체 반환
+	}
+
+	public void setUserRepository(UserRepository userRepository) {	//서비스와 변수의 관계설정
+		this.userRepository = userRepository;
+	}
+
+	public void setFailLogger(AuthFailLogger failLogger) {
+		this.failLogger = failLogger;
+	}
+
+}
+
+9.PasswordChangeService 
+package net.madvirus.spring4.chap02;
+
+public class PasswordChangeService {
+
+	private UserRepository userRepository;
+
+	public PasswordChangeService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+
+	public void changePassword(String userId, String oldPw, String newPw) {
+		User user = userRepository.findUserById(userId);
+		if (user == null)
+			throw new UserNotFoundException();
+
+		user.changePassword(oldPw, newPw);
+	}
+
+}
+
+10./src/main/resources/config.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	//User클래스의 객체를 user1으로 생성하는 것 
+	//User user1 = new User("bkchoi", "1234"); 하는 것과 동일하다 
+	<bean id="user1" class="net.madvirus.spring4.chap02.User">
+		<constructor-arg value="bkchoi" />
+		<constructor-arg value="1234" />
+	</bean>
+	
+	<bean id="user2" class="net.madvirus.spring4.chap02.User">
+		<constructor-arg value="madvirus" />
+		<constructor-arg value="qwer" />
+	</bean>
+	
+
+	//setUser에 사용할수 있도록 List객체를 받게끔
+	//위 두개 객체 생성 후 
+	//List <User> users = new ArrayList<User>();
+	//users.add(user1);
+	//users.add(user2);
+	//userRepostory= new UserRepositiory();
+	//userRepository.setUsers(users);
+	//이거는 자바코드에서 우리가 보는 코드인데, 이렇게 깔끔하게 할수 있다.
+	<bean id="userRepository" class="net.madvirus.spring4.chap02.UserRepository">
+		<property name="users">
+			<list>
+				<ref bean="user1" />
+				<ref bean="user2" />
+			</list>
+		</property>
+	</bean>
+
+
+	//constructor-arg생성자에 ref bean을 넣겠다.
+	//User user1 = new User("bkchoi", "1234"); 
+	//User user2 = new User("bkchoi", "1234"); 
+	//List <User> users = new ArrayList<User>();
+	//users.add(user1);
+	//users.add(user2);
+	//userRepostory= new UserRepositiory();
+	//userRepository.setUsers(users);
+	//PasswordChangeService pwChangeSve - new PasswordChangeService(userRepository);
+	//위에서 만든 객체를 넣어 설정을 하겠다.
+	<bean id="pwChangeSvc" 
+			class="net.madvirus.spring4.chap02.PasswordChangeService">
+		<constructor-arg><ref bean="userRepository"/></constructor-arg>
+	</bean>
+	
+
+	//AuthFailLogger auth = new AuthFailLogger(); 객체생성하기
+	//auth.setThrehold(2);
+	<bean id="authFailLogger" class="net.madvirus.spring4.chap02.AuthFailLogger">
+		<property name="threshold" value="2" />
+	</bean>
+
+	//AuthenticationService authenti = new AuthenticationService();
+	//authenti.setFailLogger(authFailLogger);
+	//authenti.setUserRepository(userRepository);
+	<bean id="authenticationService" 
+			class="net.madvirus.spring4.chap02.AuthenticationService">
+		<property name="failLogger" ref="authFailLogger" />
+		<property name="userRepository" ref="userRepository" />
+	</bean>
+</beans>
+
+11.mainByXML
+package net.madvirus.spring4.chap02.main;
+
+import net.madvirus.spring4.chap02.AuthException;
+import net.madvirus.spring4.chap02.AuthenticationService;
+import net.madvirus.spring4.chap02.PasswordChangeService;
+import net.madvirus.spring4.chap02.UserNotFoundException;
+
+import org.springframework.context.support.GenericXmlApplicationContext;
+
+public class MainByXml {		//실행해보는 것~
+
+	public static void main(String[] args) {
+		GenericXmlApplicationContext ctx = 
+				new GenericXmlApplicationContext("classpath:config.xml");
+		AuthenticationService authSvc = 
+				ctx.getBean("authenticationService", AuthenticationService.class);
+		runAuthAndCatchAuthEx(authSvc, "bkchoi", "1111");
+		runAuthAndCatchAuthEx(authSvc, "bkchoi", "11111");
+		runAuthAndCatchAuthEx(authSvc, "bkchoi", "111111");
+		try {
+			authSvc.authenticate("bkchoi2", "1111");
+		} catch (UserNotFoundException ex) {
+		}
+		authSvc.authenticate("bkchoi", "1234");
+		PasswordChangeService pwChgSvc = ctx.getBean(PasswordChangeService.class);
+		pwChgSvc.changePassword("bkchoi", "1234", "5678");
+		runAuthAndCatchAuthEx(authSvc, "bkchoi", "1234");
+		authSvc.authenticate("bkchoi", "5678");
+		ctx.close();
+	}
+
+	private static void runAuthAndCatchAuthEx(
+			AuthenticationService authSvc, String userId, String password) {
+		try {
+			authSvc.authenticate(userId, password);
+		} catch (AuthException ex) {
+		}
+	}
+}
+
+
+
+
+
+p381
+스프링 MVC 뷰 구현
+프로젝트만 돌리더래도 잘 되는지 run on server해서 확인해본다
+1pom.xml
+여기서 sts에서 legacy로 만들면 groupid에 xxx.xxx.xxx 이 되는데 레거시에는 artifactId 마지막 xxx이 들어간다
+이렇게 바꿔줘야됨.! 
+프로젝트 만들때 artifactId 가 프로젝트 시작점임. artifactId를 사용하게 될때는 그게 url의 root가 된다->tomcat의 server에서 156줄에서 바꿀수 있다
+servlet은 톰캣 버전에 따라
+스프링관련 프레임워크
+validator
+xml.bind
+apache.poi -> exel관련작업가능
+itext -> pdf 관련 작업 간으
+bulid시킬때 final name은 큰 의미는 없음
+pugin은 지워도 됨
+자동생성 되는 것들은 version 을 확인해서 4점대로 바꿔준다
+
+2. 자동생성된 오류 파일은 모두 지우기 webapp -> veiws도 에러뜨면 통으로 지운다. 내가 만든거 아니면 지워도 됨. 남의 것을 가지고 작업할때는 보면 서 작업하면 됨
+
+3.web.xml
+servlet, mapping
+모든 요청 / -> url
+dispatcherServlet- > sample.xml
+filter mapping
+4.sample.xml
+viewResolver 가 2개가 들어가면 order라는 속성으로 우선순위를 정할수 있다.
+mvc:defualt servlet handler, mvc:annotation-deriven
+5.index 
+6.
+**BeanNameViewResolver ->download , excel, xml, =>summer board
+
+login->command => logincommand 자바빈 만들고,=>loginCommandValidator=> authenticator =>memberinfo 자바빈=>memberservice=>authenticatorException->index.jsp=>loginForm
+registrationController로 테스트
+Memberservice
+
+downloadController=>
+
+
+
+
+
+
+
+
+
+
+
+

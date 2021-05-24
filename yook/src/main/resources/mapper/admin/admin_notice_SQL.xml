@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="anotice">
+	<select id="notice" resultType="hashmap" parameterType="hashmap">
+      <![CDATA[
+         SELECT 
+            NOTICE_NUM,
+            NOTICE_TITLE,
+            NOTICE_DATE
+
+         FROM NOTICE
+         WHERE NOTICE_DEL_GB = 'N'
+         ORDER BY NOTICE_NUM DESC
+      ]]>
+   </select>
+	
+   
+   <select id="anoticeDetail" parameterType="hashmap" resultType="hashmap">
+         <![CDATA[
+         SELECT 
+            NOTICE_NUM,
+            NOTICE_TITLE,
+            NOTICE_DATE,
+            NOTICE_CONTENT
+           
+         FROM
+            NOTICE
+         WHERE
+            NOTICE_NUM = #{NOTICE_NUM}
+             ]]>
+   </select> 
+   
+   
+   <insert id="insertAnotice" parameterType="hashmap">
+   			<![CDATA[
+   		INSERT INTO NOTICE(
+            NOTICE_NUM,
+            NOTICE_TITLE,
+            NOTICE_CONTENT
+
+            )
+        VALUES(
+            NOTICE_SEQ.NEXTVAL,
+            #{NOTICE_TITLE},
+            #{NOTICE_CONTENT}
+
+            )
+        ]]>   			
+   </insert>
+   
+   <select id="updateForm" parameterType="hashmap" resultType="hashmap">
+   		<![CDATA[
+   			SELECT 
+   				NOTICE_NUM,
+   				NOTICE_TITLE,
+   				NOTICE_CONTENT,
+   				NOTICE_DATE
+
+   			FROM
+   				NOTICE
+   			WHERE
+   				NOTICE_NUM = #{NOTICE_NUM}
+   		]]>
+   </select>
+   
+   <update id="updateAnotice" parameterType="hashmap">
+	<![CDATA[
+	UPDATE
+		NOTICE
+	SET
+		NOTICE_TITLE = #{NOTICE_TITLE},
+		NOTICE_CONTENT = #{NOTICE_CONTENT},
+		NOTICE_DATE = sysdate
+
+		
+	WHERE
+		NOTICE_NUM = #{NOTICE_NUM}
+	]]>
+	</update>
+	
+	<update id="deleteAnotice" parameterType="hashmap">
+	<![CDATA[
+  	   UPDATE  
+  	   	   NOTICE
+  	   SET 
+  	       NOTICE_DEL_GB = 'Y'
+       WHERE   NOTICE_NUM = #{NOTICE_NUM}
+   
+	]]>
+	</update>
+  
+</mapper>
+

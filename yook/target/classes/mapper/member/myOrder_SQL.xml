@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="myOrder">
+   <select id="openMyOrderList" parameterType="hashmap" resultType="hashmap">
+      select
+         o.order_num,
+         o.order_date,
+         o.order_price,
+         g.goods_num,
+         g.goods_name,
+         g.goods_image,
+         g.goods_price,
+         od.order_detail_amount,
+         od.order_detail_weight,
+         ga.goods_weight,
+         ao.aorder_state,
+         o.mem_num
+      from
+         admin_order ao, orders o, orders_detail od, goods g, goods_attribute ga
+      where
+         o.mem_num = #{MEM_NUM}
+         and ao.aorder_order_num = o.order_num
+         and od.order_num = o.order_num
+         and od.goods_num = g.goods_num
+         and ga.goods_num = g.goods_num
+         order by o.order_date desc
+   </select>
+
+   <select id="openMyOrderMap" parameterType="hashmap"
+      resultType="hashmap">
+      SELECT
+           O.ORDER_DATE,
+              O.ORDER_NUM,
+             O.ORDER_DZIPCODE,
+            O.ORDER_DADD1,
+             O.ORDER_DADD2,
+            O.ORDER_DMEMO,
+            O.ORDER_TCOST,
+             O.ORDER_PAY_NAME,
+             O.ORDER_PAY_RBANK,
+              O.ORDER_PAY_RACCOUNT,
+              M.MEM_NAME,
+              M.MEM_PHONE
+      FROM
+         ORDERS O , MEMBER M
+      WHERE
+         O.ORDER_NUM = #{ORDER_NUM}
+      AND
+         O.MEM_NUM = M.MEM_NUM
+   </select>
+   <select id="status" parameterType="hashmap" resultType="hashmap">
+SELECT
+      COUNT(CASE WHEN aorder_state = '0' THEN 1 END) as PAT_NOT_YET,
+      COUNT(CASE WHEN aorder_state = '1' THEN 1 END) as READY_DELIVERY,
+      COUNT(CASE WHEN aorder_state = '2' THEN 1 END) as DELIVERING,
+      COUNT(CASE WHEN aorder_state = '3' THEN 1 END) as SCDELIVERY,
+      COUNT(CASE WHEN aorder_state = '4' OR aorder_state = '5' THEN 1 END) as CXL,
+      COUNT(CASE WHEN aorder_state = '6' OR aorder_state = '7' OR aorder_state = '8' THEN 1 END) as EXCHANGE,
+      COUNT(CASE WHEN aorder_state = '9' OR aorder_state = '10' THEN 1 END) as REFUND,
+      COUNT(CASE WHEN aorder_state = '4' OR aorder_state = '5' OR aorder_state = '6' OR aorder_state = '7' OR aorder_state = '8' OR aorder_state = '9' OR aorder_state = '10' THEN 1 END) as SHIT
+   FROM admin_order
+   where mem_num = #{MEM_NUM}
+</select>
+
+   <select id="openMyOrderDetail" parameterType="hashmap" resultType="hashmap">
+   SELECT
+   O.ORDER_NUM,
+   O.ORDER_DATE,
+   M.MEM_NAME,
+   M.MEM_PHONE,
+   O.ORDER_DZIPCODE,
+   O.ORDER_DADD1,
+   O.ORDER_DADD2,
+   O.ORDER_DMEMO,
+   O.ORDER_TCOST,
+   O.ORDER_PAY_NAME,
+   O.ORDER_PAY_RBANK,
+   O.ORDER_PAY_RACCOUNT,
+   D.ORDER_DETAIL_AMOUNT,
+   GA.GOODS_WEIGHT,
+   D.GOODS_NUM,
+   A.AORDER_STATE,
+   A.AORDER_TRACKING,
+   G.GOODS_NAME,
+   G.GOODS_PRICE,
+   G.GOODS_IMAGE
+FROM
+   ORDERS O, ORDERS_DETAIL D, ADMIN_ORDER A, GOODS G, MEMBER M, GOODS_ATTRIBUTE GA
+WHERE
+   O.MEM_NUM = #{MEM_NUM}
+   AND
+   O.MEM_NUM = M.MEM_NUM
+   AND
+   O.ORDER_NUM = #{ORDER_NUM}
+   AND
+   A.AORDER_ORDER_NUM = O.ORDER_NUM
+   AND
+   D.ORDER_NUM = O.ORDER_NUM
+   AND
+   G.GOODS_NUM = D.GOODS_NUM
+   AND
+   G.GOODS_NUM = GA.GOODS_NUM
+   AND
+   G.GOODS_NAME = #{GOODS_NAME}
+   </select>
+   
+   <select id="openMyChangeForm" parameterType="hashmap" resultType="hashmap">
+   
+       select DISTINCT
+      od.ORDER_NUM,
+      od.GOODS_NUM,
+      od.ORDER_DETAIL_AMOUNT,
+      od.ORDER_DETAIL_WEIGHT,
+      g.GOODS_NAME,
+      ao.AORDER_STATE
+   from
+      ORDERS_DETAIL od,
+      ORDERS o,
+      goods g,
+      admin_order ao
+   where
+      od.ORDER_NUM = #{ORDER_NUM}
+      AND 
+      o.MEM_NUM = #{MEM_NUM}
+    AND
+      od.GOODS_NUM = #{GOODS_NUM}
+      AND g.goods_num = od.GOODS_NUM
+      AND ao.AORDER_ORDER_NUM = #{ORDER_NUM}
+      AND ao.AORDER_ORDER_NUM = od.ORDER_NUM
+      AND od.ORDER_DETAIL_WEIGHT = #{ORDER_DETAIL_WEIGHT}
+     
+   
+   </select>
+   
+   <update id="updateMyChange" parameterType="hashmap">
+   <![CDATA[ 
+   UPDATE 
+      ADMIN_ORDER
+   SET
+      AORDER_STATE = #{AORDER_STATE},
+      ORDER_REPORT_COMMENT = #{ORDER_REPORT_COMMENT},
+      AS_SDATE = SYSDATE
+   WHERE
+      AORDER_ORDER_NUM = #{ORDER_NUM}
+      
+      ]]>
+   </update>
+   
+</mapper>

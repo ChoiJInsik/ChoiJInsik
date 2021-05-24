@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="member">
+   
+   <insert id="insertJoin" parameterType="hashmap">
+		<selectKey keyProperty="MEM_NUM" resultType="int" order="BEFORE">
+   			select MEMBER_SEQ.NEXTVAL FROM DUAL
+   		</selectKey>
+ 		<![CDATA[
+        	INSERT INTO MEMBER
+	        	(
+		        MEM_NUM, MEM_ID,MEM_PW, 
+				MEM_NAME,MEM_EMAIL,MEM_PHONE,
+				MEM_ZIPCODE,MEM_ADDRESS1,MEM_ADDRESS2,MEM_EMAILCK
+        	) VALUES (
+	           #{MEM_NUM},
+	           #{MEM_ID},
+	           #{MEM_PW},
+	           #{MEM_NAME},
+	           #{MEM_EMAIL},
+	           #{MEM_PHONE},
+	           #{MEM_ZIPCODE},
+	           #{MEM_ADDRESS1},
+	           #{MEM_ADDRESS2},
+	           #{MEM_EMAILCK}
+        	)
+    	]]>
+	</insert>
+        
+        <select id="selectIdCheck" parameterType="hashMap" resultType="Int">
+      <![CDATA[
+          SELECT  COUNT(MEM_ID)
+         FROM    MEMBER
+         WHERE   MEM_ID = #{MEM_ID}
+         AND       MEM_DEL_GB = 'N'
+      ]]>
+</select>
+     
+</mapper>

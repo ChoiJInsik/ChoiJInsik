@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="aevent">
+	<select id="event" resultType="hashmap" parameterType="hashmap">
+      <![CDATA[
+         SELECT 
+            ET_NUM,
+            ET_TITLE,
+            ET_SD,
+            ET_FD
+         FROM EVENT
+         WHERE ET_DEL_GB = 'N'
+         ORDER BY ET_NUM DESC
+      ]]>
+   </select>
+	
+   
+   <select id="aeventDetail" parameterType="hashmap" resultType="hashmap">
+         <![CDATA[
+         SELECT 
+            ET_NUM,
+            ET_TITLE,
+            ET_CONTENT,
+            ET_SD,
+            ET_FD            
+           
+         FROM
+            EVENT
+         WHERE
+            ET_NUM = #{ET_NUM}
+             ]]>
+   </select> 
+   
+   
+   <insert id="insertAevent" parameterType="hashmap">
+   			<![CDATA[
+   		INSERT INTO EVENT(
+            ET_NUM,
+            ET_TITLE,
+            ET_CONTENT,
+            ET_SD,
+            ET_FD
+            )
+        VALUES(
+            EVENT_SEQ.NEXTVAL,
+            #{ET_TITLE},
+            #{ET_CONTENT},
+            #{ET_SD},
+            #{ET_FD}
+            )
+        ]]>   			
+   </insert>
+   
+   <select id="updateForm" parameterType="hashmap" resultType="hashmap">
+   		<![CDATA[
+   			SELECT 
+   				ET_NUM,
+   				ET_TITLE,
+   				ET_CONTENT,
+   				ET_SD,
+   				ET_FD
+   			FROM
+   				EVENT
+   			WHERE
+   				ET_NUM = #{ET_NUM}
+   		]]>
+   </select>
+   
+   <update id="updateAevent" parameterType="hashmap">
+	<![CDATA[
+	UPDATE
+		EVENT
+	SET
+		ET_TITLE = #{ET_TITLE},
+		ET_CONTENT = #{ET_CONTENT},
+		ET_SD = #{ET_SD},
+		ET_FD = #{ET_FD}
+		
+	WHERE
+		ET_NUM = #{ET_NUM}
+	]]>
+	</update>
+	
+	<update id="deleteAevent" parameterType="hashmap">
+	<![CDATA[
+  	   UPDATE  
+  	   	   EVENT
+  	   SET 
+  	       ET_DEL_GB = 'Y'
+       WHERE   ET_NUM = #{ET_NUM}
+   
+	]]>
+	</update>
+  
+</mapper>
